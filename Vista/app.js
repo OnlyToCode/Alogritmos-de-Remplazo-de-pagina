@@ -58,6 +58,15 @@ document.getElementById('sim-form').addEventListener('submit', async function(ev
 
 async function mostrarEstado() {
     const resultados = document.getElementById('resultados');
+    // Guardar posición de scroll antes de actualizar
+    const simTableWrapper = resultados.querySelector('.sim-table-wrapper');
+    let prevScrollLeft = simTableWrapper ? simTableWrapper.scrollLeft : null;
+    let userScrolling = false;
+    if (simTableWrapper) {
+        simTableWrapper.addEventListener('scroll', () => {
+            userScrolling = true;
+        }, { once: true });
+    }
     try {
         const response = await fetch('http://127.0.0.1:5000/estado');
         const data = await response.json();
@@ -65,6 +74,15 @@ async function mostrarEstado() {
             resultados.innerHTML = `<p style='color: red;'>${data.error}</p>`;
         } else {
             resultados.innerHTML = renderSimulacion(data);
+            // Scroll automático solo si el usuario no está desplazando manualmente
+            const newSimTableWrapper = resultados.querySelector('.sim-table-wrapper');
+            if (newSimTableWrapper) {
+                if (userScrolling && prevScrollLeft !== null) {
+                    newSimTableWrapper.scrollLeft = prevScrollLeft;
+                } else {
+                    newSimTableWrapper.scrollLeft = newSimTableWrapper.scrollWidth;
+                }
+            }
         }
     } catch (error) {
         resultados.innerHTML = `<p style='color: red;'>No se pudo conectar con el servidor.</p>`;
@@ -96,7 +114,15 @@ function renderBadgeEstado(estado, proximaPagina) {
 }
 
 function renderSimulacion(data) {
-    let html = `<h2>Estado de la simulación</h2>`;
+    let html = `<h2 style='display: flex; justify-content: space-between; align-items: center;'>
+        <span>Estado de la simulación</span>
+        <span style='display: flex; gap: 1.5em;'>
+            <span><strong>Próxima página:</strong></span>
+            <span style='min-width: 2.5em; display: inline-block; text-align: center; background: #eaf6ff; border-radius: 0.5em; padding: 0.2em 0.8em; font-weight: bold;'>
+                ${data.proxima_pagina ?? '-'}
+            </span>
+        </span>
+    </h2>`;
     document.getElementById('badge-estado').innerHTML = renderBadgeEstado(data.estado_maquina, data.proxima_pagina);
     html += `<div class='sim-table-wrapper'><table class='sim-table'>`;
     // Historial de páginas (encabezado superior)
@@ -167,16 +193,17 @@ if (btnPlay) {
             btnPlay.textContent = 'Pausar';
             btnPlay.classList.add('pausar');
             playInterval = setInterval(async () => {
-                const resp = await fetch('http://127.0.0.1:5000/avanzar', { method: 'POST' });
-                const data = await resp.json();
+                await fetch('http://127.0.0.1:5000/avanzar', { method: 'POST' });
+                const estadoResp = await fetch('http://127.0.0.1:5000/estado');
+                const estadoData = await estadoResp.json();
                 mostrarEstado();
-                if (!data.proxima_pagina) {
+                if (estadoData.estado_maquina === 'en_espera' && !estadoData.proxima_pagina) {
                     clearInterval(playInterval);
                     playInterval = null;
                     btnPlay.textContent = 'Play';
                     btnPlay.classList.remove('pausar');
                 }
-            }, 800); // velocidad de avance
+            }, 800);
         }
     });
 }
