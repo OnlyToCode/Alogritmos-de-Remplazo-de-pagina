@@ -168,7 +168,8 @@ if (btnAvanzar) {
 const btnRetroceder = document.getElementById('btn-retroceder');
 if (btnRetroceder) {
     btnRetroceder.addEventListener('click', async function() {
-        await fetch('http://127.0.0.1:5000/retroceder', { method: 'POST' });
+        const resp = await fetch('http://127.0.0.1:5000/retroceder', { method: 'POST' });
+        const data = await resp.json();
         mostrarEstado();
     });
 }

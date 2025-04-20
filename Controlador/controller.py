@@ -48,8 +48,7 @@ class Controller:
 
     def retroceder(self):
         if self.algoritmo == 'fifo' and self.fifo:
-            # No implementado para FIFO, solo avanza
-            return self.fifo.get_estado()
+            return self.fifo.retroceder()
         if self.marcos and self.marcos.current_step > 0:
             self.marcos.current_step -= 1
         return self.get_estado()

@@ -1,10 +1,13 @@
 from Modelo.frame_page import Marcos, Pagina
 from collections import deque
+from copy import deepcopy
 
 class FIFO:
     def __init__(self, cantidad_marcos):
         self.marcos = Marcos(cantidad_marcos, modelo='fifo')
         self.cola = deque()  # Para llevar el orden FIFO
+        self.estados_marcos = []  # Guardar copia profunda de marcos en cada paso
+        self.estados_cola = []    # Guardar copia profunda de la cola en cada paso
 
     def cargar_paginas(self, lista_paginas):
         paginas = [Pagina(num) for num in lista_paginas]
@@ -34,6 +37,9 @@ class FIFO:
         self.marcos.historial_paginas.append(pagina)
         self.marcos.agregar_iteracion(page_fault)
         self.marcos.avanzar_pagina()
+        # Guardar el estado profundo de marcos y cola
+        self.estados_marcos.append(deepcopy(self.marcos.marcos))
+        self.estados_cola.append(deepcopy(self.cola))
         return self.marcos.get_estado()
 
     def terminado(self):
@@ -45,4 +51,28 @@ class FIFO:
     def reiniciar(self, lista_paginas):
         self.marcos.reset()
         self.cola.clear()
+        self.estados_marcos = []
+        self.estados_cola = []
         self.cargar_paginas(lista_paginas)
+
+    def retroceder(self):
+        # Solo retrocede si hay al menos una iteración previa
+        if self.marcos.current_step > 0:
+            self.marcos.current_step -= 1
+            # Elimina la última iteración de la matriz, page_faults e historial_paginas si están sincronizados
+            if len(self.marcos.matriz) > self.marcos.current_step + 1:
+                self.marcos.matriz.pop()
+            if len(self.marcos.page_faults) > self.marcos.current_step + 1:
+                self.marcos.page_faults.pop()
+            if len(self.marcos.historial_paginas) > self.marcos.current_step + 1:
+                self.marcos.historial_paginas.pop()
+            if self.marcos.proxima_pagina_idx > 0:
+                self.marcos.proxima_pagina_idx -= 1
+            # Restaurar el estado de los marcos y la cola al current_step
+            if self.estados_marcos and self.estados_cola:
+                self.marcos.marcos = deepcopy(self.estados_marcos[self.marcos.current_step])
+                self.cola = deepcopy(self.estados_cola[self.marcos.current_step])
+                # Eliminar los estados futuros
+                self.estados_marcos = self.estados_marcos[:self.marcos.current_step+1]
+                self.estados_cola = self.estados_cola[:self.marcos.current_step+1]
+        return self.get_estado()
