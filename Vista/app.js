@@ -76,28 +76,33 @@ async function reiniciarSimulacion() {
     mostrarEstado();
 }
 
-function renderBadgeEstado(estado) {
+function renderBadgeEstado(estado, proximaPagina) {
     let clase = '';
-    if (estado === 'en_espera') clase = 'badge badge-en_espera';
-    else if (estado === 'decidiendo') clase = 'badge badge-decidiendo';
-    else if (estado === 'actualizando') clase = 'badge badge-actualizando';
-    return `<span class="${clase}">${estado.replace('_', ' ').toUpperCase()}</span>`;
+    let label = '';
+    if (estado === 'en_espera' && proximaPagina === null) {
+        clase = 'badge badge-en_espera';
+        label = 'FINALIZADO';
+    } else if (estado === 'en_espera') {
+        clase = 'badge badge-en_espera';
+        label = 'EN ESPERA';
+    } else if (estado === 'decidiendo') {
+        clase = 'badge badge-decidiendo';
+        label = 'DECIDIENDO';
+    } else if (estado === 'actualizando') {
+        clase = 'badge badge-actualizando';
+        label = 'ACTUALIZANDO';
+    }
+    return `<span class="${clase}">${label}</span>`;
 }
 
 function renderSimulacion(data) {
     let html = `<h2>Estado de la simulación</h2>`;
-    document.getElementById('badge-estado').innerHTML = renderBadgeEstado(data.estado_maquina);
+    document.getElementById('badge-estado').innerHTML = renderBadgeEstado(data.estado_maquina, data.proxima_pagina);
     html += `<div class='sim-table-wrapper'><table class='sim-table'>`;
     // Historial de páginas (encabezado superior)
     html += `<tr class='historial-row'><td class='historial'>Historial</td>`;
     for (let i = 0; i < data.historial_paginas.length; i++) {
         html += `<td class='historial'>${data.historial_paginas[i]}</td>`;
-    }
-    html += `</tr>`;
-    // Encabezado de iteraciones (números de paso)
-    html += `<tr><th>Marco</th>`;
-    for (let i = 0; i < data.marcos.length; i++) {
-        html += `<th>${i+1}</th>`;
     }
     html += `</tr>`;
     // Filas de marcos (cada marco es una fila, cada columna es una iteración)
