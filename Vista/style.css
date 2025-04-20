@@ -1,0 +1,119 @@
+/* style.css - Estilos básicos para la vista */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 2rem;
+    background: #f5f5f5;
+}
+h1 {
+    text-align: center;
+}
+form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: 2rem auto;
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+label, input, select, button {
+    margin-bottom: 1rem;
+}
+#resultados {
+    max-width: 100vw;
+    overflow-x: auto;
+    margin: 2rem auto;
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    min-height: 100px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+#badge-estado {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+.badge {
+    display: inline-block;
+    padding: 0.5em 1em;
+    border-radius: 1em;
+    color: #fff;
+    font-weight: bold;
+    margin: 0 0.5em;
+    transition: background 0.4s;
+}
+.badge-en_espera { background: #3498db; }
+.badge-decidiendo { background: #f39c12; }
+.badge-actualizando { background: #27ae60; }
+
+tr.page-fault {
+    background: #ffe0e0;
+    transition: background 0.5s;
+}
+td.actual {
+    background: #f7d358;
+    font-weight: bold;
+    transition: background 0.5s;
+}
+button#btn-play.pausar {
+    background: #e67e22;
+    color: #fff;
+}
+button#btn-play {
+    background: #27ae60;
+    color: #fff;
+}
+button#btn-reiniciar {
+    background: #c0392b;
+    color: #fff;
+}
+.sim-table-wrapper {
+    overflow-x: auto;
+    width: 100%;
+}
+.sim-table {
+    border-collapse: collapse;
+    min-width: 600px;
+    margin: 0 auto;
+}
+.sim-table th, .sim-table td {
+    padding: 0.5em 1em;
+    text-align: center;
+    border: 1px solid #ccc;
+    min-width: 40px;
+}
+.sim-table th.historial, .sim-table td.historial {
+    background: #eaf6ff;
+    font-weight: bold;
+}
+.sim-table tr.page-fault-row td {
+    background: #fffbe6;
+    font-size: 1.3em;
+    border-top: 2px solid #f39c12;
+}
+.sim-table tr.page-fault-row td.good {
+    color: #27ae60;
+}
+.sim-table tr.page-fault-row td.bad {
+    color: #c0392b;
+}
+.sim-table tr.historial-row td {
+    background: #eaf6ff;
+    font-size: 1.1em;
+    font-weight: bold;
+    border-bottom: 2px solid #3498db;
+}
+.sim-table td.actual {
+    background: #f7d358;
+    font-weight: bold;
+    transition: background 0.5s;
+}

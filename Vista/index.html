@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Algoritmos de Reemplazo de Página</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Simulador de Algoritmos de Reemplazo de Página</h1>
+    <form id="sim-form">
+        <label for="algorithm">Algoritmo:</label>
+        <select id="algorithm" name="algorithm">
+            <option value="fifo">FIFO</option>
+            <option value="lru">LRU</option>
+            <option value="optimo">Óptimo</option>
+            <option value="fifo_plus">FIFO Plus</option>
+            <option value="reloj">Reloj</option>
+            <option value="second_opportunity">Second Opportunity</option>
+        </select>
+        <label for="frames">Número de marcos:</label>
+        <input type="number" id="frames" name="frames" min="1" required>
+        <label for="sequence">Secuencia de páginas (separadas por coma):</label>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="text" id="sequence" name="sequence" placeholder="Ej: 1,2,3,2,1,4,5" required>
+            <label style="display: flex; align-items: center; gap: 0.3rem;">
+                <input type="checkbox" id="chk-auto-paginas"> Auto páginas
+            </label>
+        </div>
+        <button type="submit">Simular</button>
+    </form>
+    <div class="controls">
+        <button type="button" id="btn-retroceder">Retroceder</button>
+        <button type="button" id="btn-avanzar">Avanzar</button>
+        <button type="button" id="btn-play">Play</button>
+        <button type="button" id="btn-reiniciar">Reiniciar</button>
+    </div>
+    <div id="badge-estado"></div>
+    <section id="resultados">
+        <!-- Aquí se mostrarán los resultados de la simulación -->
+    </section>
+    <script src="app.js"></script>
+</body>
+</html>
