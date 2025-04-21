@@ -1,5 +1,6 @@
 from Modelo.frame_page import Marcos, Pagina
 from Modelo.fifo import FIFO
+from Modelo.lru import LRU
 import random
 
 class GeneradorPaginas:
@@ -16,6 +17,7 @@ class Controller:
         self.marcos = None
         self.last_state = None
         self.fifo = None
+        self.lru = None
         self.algoritmo = None
 
     def observer_callback(self, estado):
@@ -27,6 +29,11 @@ class Controller:
             self.fifo.cargar_paginas(lista_paginas)
             self.algoritmo = 'fifo'
             return self.fifo.get_estado()
+        if modelo == 'lru':
+            self.lru = LRU(cantidad_marcos)
+            self.lru.cargar_paginas(lista_paginas)
+            self.algoritmo = 'lru'
+            return self.lru.get_estado()
         # ...otros algoritmos...
         # fallback legacy:
         self.marcos = Marcos(cantidad=cantidad_marcos, modelo=modelo)
@@ -38,6 +45,8 @@ class Controller:
     def avanzar(self):
         if self.algoritmo == 'fifo' and self.fifo:
             return self.fifo.paso()
+        if self.algoritmo == 'lru' and self.lru:
+            return self.lru.paso()
         # ...otros algoritmos...
         if self.marcos and self.marcos.hay_pagina_por_decidir():
             self.marcos.recibir_pagina(self.marcos.obtener_pagina_actual())
@@ -49,6 +58,8 @@ class Controller:
     def retroceder(self):
         if self.algoritmo == 'fifo' and self.fifo:
             return self.fifo.retroceder()
+        if self.algoritmo == 'lru' and self.lru:
+            return self.lru.retroceder()
         if self.marcos and self.marcos.current_step > 0:
             self.marcos.current_step -= 1
         return self.get_estado()
@@ -58,6 +69,10 @@ class Controller:
             paginas = [p.numero for p in self.fifo.marcos.historial_paginas]
             self.fifo.reiniciar(paginas)
             return self.fifo.get_estado()
+        if self.algoritmo == 'lru' and self.lru:
+            paginas = [p.numero for p in self.lru.marcos.historial_paginas]
+            self.lru.reiniciar(paginas)
+            return self.lru.get_estado()
         if self.marcos:
             modelo = self.marcos.modelo
             cantidad = self.marcos.cantidad
@@ -68,6 +83,8 @@ class Controller:
     def get_estado(self):
         if self.algoritmo == 'fifo' and self.fifo:
             return self.fifo.get_estado()
+        if self.algoritmo == 'lru' and self.lru:
+            return self.lru.get_estado()
         if self.marcos:
             return {
                 "marcos": self.marcos.matriz,
