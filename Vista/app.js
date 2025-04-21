@@ -140,8 +140,14 @@ function renderSimulacion(data) {
             for (let iter = 0; iter < data.marcos.length; iter++) {
                 let cellClass = (iter === data.current_step) ? 'actual' : '';
                 let valor = data.marcos[iter][marcoIdx] ?? '-';
-                // Segunda Oportunidad: pinta azul si bit_uso activo, sin filas extra
-                if (data.bits_uso && !data.punteros && data.bits_uso[iter]) {
+                // FIFO Mejorado: pinta azul si bit_proteccion activo
+                if (data.bits_proteccion && data.bits_proteccion[iter]) {
+                    let bit = data.bits_proteccion[iter][marcoIdx];
+                    let style = '';
+                    if (bit) style += 'background: #a3c9f7;'; // azul
+                    html += `<td class='${cellClass}' style='${style}'>${valor}</td>`;
+                // Segunda Oportunidad: pinta azul claro si bit_uso activo
+                } else if (data.bits_uso && !data.punteros && data.bits_uso[iter]) {
                     let bit = data.bits_uso[iter][marcoIdx];
                     let style = '';
                     if (bit) style += 'background: #cce4ff;'; // azul claro
@@ -161,17 +167,7 @@ function renderSimulacion(data) {
             html += `</tr>`;
         }
     }
-    // Elimina completamente la visualización de filas de bits de uso, incluso del placeholder
-    // Visualización de bits de protección para Second Opportunity
-    if (data.bits_proteccion) {
-        html += `<tr><td><strong>Bit protección</strong></td>`;
-        for (let marcoIdx = 0; marcoIdx < data.bits_proteccion[0].length; marcoIdx++) {
-            let bit = data.bits_proteccion[0][marcoIdx];
-            let emoji = bit ? '🛡️' : '▫️';
-            html += `<td style='font-size:1.2em;'>${emoji}</td>`;
-        }
-        html += `</tr>`;
-    }
+    // Elimina completamente la visualización de filas de bits de protección, incluso del placeholder
     // Fila de page faults con emojis (alineados con las iteraciones)
     html += `<tr class='page-fault-row'><td>Page Fault</td>`;
     for (let i = 0; i < data.page_faults.length; i++) {
@@ -182,6 +178,21 @@ function renderSimulacion(data) {
     }
     html += `</tr>`;
     html += `</table></div>`;
+
+    // Mostrar errores de página comparados con el óptimo al final de la simulación
+    if (data.comparacion_errores) {
+        html += `<div class='comparacion-errores'><h3>Errores de página por algoritmo</h3><ul>`;
+        for (const alg of data.comparacion_errores) {
+            html += `<li><strong>${alg.nombre}:</strong> ${alg.fallos} errores`;
+            if (alg.diferencia > 0) {
+                html += ` <span style='color: #c0392b;'>(+${alg.diferencia} respecto al óptimo)</span>`;
+            } else if (alg.diferencia === 0) {
+                html += ` <span style='color: #27ae60;'>(Óptimo)</span>`;
+            }
+            html += `</li>`;
+        }
+        html += `</ul></div>`;
+    }
     return html;
 }
 
