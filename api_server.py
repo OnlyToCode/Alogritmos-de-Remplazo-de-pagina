@@ -51,4 +51,12 @@ def generar_paginas():
     return jsonify({'paginas': paginas})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    import os
+    # Detectar si está en Codespaces
+    in_codespaces = 'CODESPACES' in os.environ or 'CODESPACE_NAME' in os.environ
+    port = int(os.environ.get('PORT', 5000))
+    if in_codespaces:
+        app.run(host='0.0.0.0', port=port, debug=True)
+    else:
+        app.run(debug=True)
+    # python /workspaces/Alogritmos-de-Remplazo-de-pagina/api_server.py

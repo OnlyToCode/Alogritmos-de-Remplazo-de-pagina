@@ -3,6 +3,25 @@
 const chkAutoPaginas = document.getElementById('chk-auto-paginas');
 const inputSequence = document.getElementById('sequence');
 
+// Función para obtener la URL base del backend
+function getApiUrl(path) {
+    try {
+        // Si estamos en Codespaces, el hostname es algo como xxxx-5500.app.github.dev
+        // El backend estará en el mismo hostname pero puerto 5000
+        const host = window.location.hostname;
+        if (host.endsWith('.app.github.dev')) {
+            // Reemplaza el puerto en la URL
+            return `https://${host.replace(/-\d+\./, '-5000.')}${path}`;
+        } else {
+            // Local
+            return `http://127.0.0.1:5000${path}`;
+        }
+    } catch (e) {
+        // Fallback local
+        return `http://127.0.0.1:5000${path}`;
+    }
+}
+
 chkAutoPaginas.addEventListener('change', function() {
     if (chkAutoPaginas.checked) {
         inputSequence.required = false;
@@ -10,10 +29,14 @@ chkAutoPaginas.addEventListener('change', function() {
         // Generar páginas aleatorias y ponerlas en el input
         const cantidad = 15; // puedes ajustar la cantidad
         const minimo = 0, maximo = 9;
-        fetch(`http://127.0.0.1:5000/generar_paginas?cantidad=${cantidad}&minimo=${minimo}&maximo=${maximo}`)
+        fetch(getApiUrl(`/generar_paginas?cantidad=${cantidad}&minimo=${minimo}&maximo=${maximo}`))
             .then(resp => resp.json())
             .then(data => {
                 inputSequence.value = data.paginas.join(',');
+            })
+            .catch(() => {
+                inputSequence.value = '';
+                alert('No se pudo conectar con el servidor para generar páginas.');
             });
     } else {
         inputSequence.required = true;
@@ -35,7 +58,7 @@ document.getElementById('sim-form').addEventListener('submit', async function(ev
     const resultados = document.getElementById('resultados');
     resultados.innerHTML = '<p>Enviando datos al servidor...</p>';
     try {
-        const response = await fetch('http://127.0.0.1:5000/simular', {
+        const response = await fetch(getApiUrl('/simular'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -70,7 +93,7 @@ async function mostrarEstado() {
         }, { once: true });
     }
     try {
-        const response = await fetch('http://127.0.0.1:5000/estado');
+        const response = await fetch(getApiUrl('/estado'));
         const data = await response.json();
         if (data.error) {
             resultados.innerHTML = `<p style='color: red;'>${data.error}</p>`;
@@ -92,7 +115,7 @@ async function mostrarEstado() {
 }
 
 async function reiniciarSimulacion() {
-    await fetch('http://127.0.0.1:5000/reiniciar', { method: 'POST' });
+    await fetch(getApiUrl('/reiniciar'), { method: 'POST' });
     mostrarEstado();
 }
 
@@ -200,7 +223,7 @@ function renderSimulacion(data) {
 const btnAvanzar = document.getElementById('btn-avanzar');
 if (btnAvanzar) {
     btnAvanzar.addEventListener('click', async function() {
-        await fetch('http://127.0.0.1:5000/avanzar', { method: 'POST' });
+        await fetch(getApiUrl('/avanzar'), { method: 'POST' });
         mostrarEstado();
     });
 }
@@ -209,7 +232,7 @@ if (btnAvanzar) {
 const btnRetroceder = document.getElementById('btn-retroceder');
 if (btnRetroceder) {
     btnRetroceder.addEventListener('click', async function() {
-        const resp = await fetch('http://127.0.0.1:5000/retroceder', { method: 'POST' });
+        const resp = await fetch(getApiUrl('/retroceder'), { method: 'POST' });
         const data = await resp.json();
         mostrarEstado();
     });
@@ -257,7 +280,7 @@ if (btnPlay) {
                     btnPlay.classList.remove('pausar');
                     return;
                 }
-                await fetch('http://127.0.0.1:5000/avanzar', { method: 'POST' });
+                await fetch(getApiUrl('/avanzar'), { method: 'POST' });
                 await mostrarEstado();
             }, 800);
         }
