@@ -2,6 +2,7 @@ from Modelo.frame_page import Marcos, Pagina
 from Modelo.fifo import FIFO
 from Modelo.lru import LRU
 from Modelo.optimo import Optimo
+from Modelo.Fifo_plus.second_opportunity import SecondOpportunity
 import random
 
 class GeneradorPaginas:
@@ -20,6 +21,7 @@ class Controller:
         self.fifo = None
         self.lru = None
         self.optimo = None
+        self.second_opportunity = None
         self.algoritmo = None
 
     def observer_callback(self, estado):
@@ -41,6 +43,11 @@ class Controller:
             self.optimo.cargar_paginas(lista_paginas)
             self.algoritmo = 'optimo'
             return self.optimo.get_estado()
+        if modelo == 'second_opportunity':
+            self.second_opportunity = SecondOpportunity(cantidad_marcos)
+            self.second_opportunity.cargar_paginas(lista_paginas)
+            self.algoritmo = 'second_opportunity'
+            return self.second_opportunity.get_estado()
         # ...otros algoritmos...
         # fallback legacy:
         self.marcos = Marcos(cantidad=cantidad_marcos, modelo=modelo)
@@ -56,6 +63,8 @@ class Controller:
             return self.lru.paso()
         if self.algoritmo == 'optimo' and self.optimo:
             return self.optimo.paso()
+        if self.algoritmo == 'second_opportunity' and self.second_opportunity:
+            return self.second_opportunity.paso()
         # ...otros algoritmos...
         if self.marcos and self.marcos.hay_pagina_por_decidir():
             self.marcos.recibir_pagina(self.marcos.obtener_pagina_actual())
@@ -71,6 +80,8 @@ class Controller:
             return self.lru.retroceder()
         if self.algoritmo == 'optimo' and self.optimo:
             return self.optimo.retroceder()
+        if self.algoritmo == 'second_opportunity' and self.second_opportunity:
+            return self.second_opportunity.retroceder()
         if self.marcos and self.marcos.current_step > 0:
             self.marcos.current_step -= 1
         return self.get_estado()
@@ -88,6 +99,10 @@ class Controller:
             paginas = [p.numero for p in self.optimo.marcos.historial_paginas]
             self.optimo.reiniciar(paginas)
             return self.optimo.get_estado()
+        if self.algoritmo == 'second_opportunity' and self.second_opportunity:
+            paginas = [p.numero for p in self.second_opportunity.marcos.historial_paginas]
+            self.second_opportunity.reiniciar(paginas)
+            return self.second_opportunity.get_estado()
         if self.marcos:
             modelo = self.marcos.modelo
             cantidad = self.marcos.cantidad
@@ -102,6 +117,8 @@ class Controller:
             return self.lru.get_estado()
         if self.algoritmo == 'optimo' and self.optimo:
             return self.optimo.get_estado()
+        if self.algoritmo == 'second_opportunity' and self.second_opportunity:
+            return self.second_opportunity.get_estado()
         if self.marcos:
             return {
                 "marcos": self.marcos.matriz,

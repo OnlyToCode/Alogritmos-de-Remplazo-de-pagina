@@ -144,6 +144,29 @@ function renderSimulacion(data) {
             html += `</tr>`;
         }
     }
+    // Visualización de bits de uso para Second Opportunity
+    if (data.bits_uso) {
+        for (let marcoIdx = 0; marcoIdx < data.bits_uso[0].length; marcoIdx++) {
+            html += `<tr><td><strong>Bit de uso</strong></td>`;
+            for (let iter = 0; iter < data.marcos.length; iter++) {
+                let bit = data.bits_uso[iter][marcoIdx];
+                let emoji = bit ? '🟢' : '⚪';
+                let style = bit ? "background: #d4f7c5;" : "background: #f5f5f5;";
+                html += `<td style='font-size:1.2em; ${style}'>${emoji}</td>`;
+            }
+            html += `</tr>`;
+        }
+    }
+    // Visualización de bits de protección para Second Opportunity
+    if (data.bits_proteccion) {
+        html += `<tr><td><strong>Bit protección</strong></td>`;
+        for (let marcoIdx = 0; marcoIdx < data.bits_proteccion[0].length; marcoIdx++) {
+            let bit = data.bits_proteccion[0][marcoIdx];
+            let emoji = bit ? '🛡️' : '▫️';
+            html += `<td style='font-size:1.2em;'>${emoji}</td>`;
+        }
+        html += `</tr>`;
+    }
     // Fila de page faults con emojis (alineados con las iteraciones)
     html += `<tr class='page-fault-row'><td>Page Fault</td>`;
     for (let i = 0; i < data.page_faults.length; i++) {
