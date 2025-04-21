@@ -139,24 +139,29 @@ function renderSimulacion(data) {
             html += `<tr><td>Marco ${marcoIdx+1}</td>`;
             for (let iter = 0; iter < data.marcos.length; iter++) {
                 let cellClass = (iter === data.current_step) ? 'actual' : '';
-                html += `<td class='${cellClass}'>${data.marcos[iter][marcoIdx] ?? '-'}</td>`;
+                let valor = data.marcos[iter][marcoIdx] ?? '-';
+                // Segunda Oportunidad: pinta azul si bit_uso activo, sin filas extra
+                if (data.bits_uso && !data.punteros && data.bits_uso[iter]) {
+                    let bit = data.bits_uso[iter][marcoIdx];
+                    let style = '';
+                    if (bit) style += 'background: #cce4ff;'; // azul claro
+                    html += `<td class='${cellClass}' style='${style}'>${valor}</td>`;
+                // Reloj: pinta verde y muestra reloj si puntero
+                } else if (data.bits_uso && data.punteros && data.bits_uso[iter] && typeof data.punteros[iter] !== 'undefined') {
+                    let bit = data.bits_uso[iter][marcoIdx];
+                    let isPointer = (data.punteros[iter] % data.bits_uso[0].length) === marcoIdx;
+                    let style = '';
+                    if (bit) style += 'background: #d4f7c5;';
+                    let pointerMark = isPointer ? `<span style='color:#e67e22;font-weight:bold; margin-left:0.3em;'>⏰</span>` : '';
+                    html += `<td class='${cellClass}' style='${style}'>${valor}${pointerMark}</td>`;
+                } else {
+                    html += `<td class='${cellClass}'>${valor}</td>`;
+                }
             }
             html += `</tr>`;
         }
     }
-    // Visualización de bits de uso para Second Opportunity
-    if (data.bits_uso) {
-        for (let marcoIdx = 0; marcoIdx < data.bits_uso[0].length; marcoIdx++) {
-            html += `<tr><td><strong>Bit de uso</strong></td>`;
-            for (let iter = 0; iter < data.marcos.length; iter++) {
-                let bit = data.bits_uso[iter][marcoIdx];
-                let emoji = bit ? '🟢' : '⚪';
-                let style = bit ? "background: #d4f7c5;" : "background: #f5f5f5;";
-                html += `<td style='font-size:1.2em; ${style}'>${emoji}</td>`;
-            }
-            html += `</tr>`;
-        }
-    }
+    // Elimina completamente la visualización de filas de bits de uso, incluso del placeholder
     // Visualización de bits de protección para Second Opportunity
     if (data.bits_proteccion) {
         html += `<tr><td><strong>Bit protección</strong></td>`;

@@ -58,9 +58,12 @@ class SecondOpportunity:
         return not self.marcos.hay_pagina_por_decidir()
 
     def get_estado(self):
-        # Devuelve el historial real de bits de uso para la vista
         estado = self.marcos.get_estado()
-        estado['bits_uso'] = self.estados_bits.copy()
+        # Si no hay historial, inicializa bits_uso con valores por defecto para mostrar placeholder
+        if not self.estados_bits:
+            estado['bits_uso'] = [[False for _ in range(self.marcos.cantidad)]]
+        else:
+            estado['bits_uso'] = self.estados_bits.copy()
         return estado
 
     def reiniciar(self, lista_paginas):
