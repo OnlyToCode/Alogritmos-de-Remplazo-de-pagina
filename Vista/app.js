@@ -30,6 +30,8 @@ document.getElementById('sim-form').addEventListener('submit', async function(ev
     if (chkAutoPaginas.checked && !secuencia) {
         secuencia = inputSequence.value;
     }
+    // Guardar el tamaño de la secuencia
+    totalPaginas = secuencia.split(',').filter(x => x.trim() !== '').length;
     const resultados = document.getElementById('resultados');
     resultados.innerHTML = '<p>Enviando datos al servidor...</p>';
     try {
@@ -183,7 +185,9 @@ if (btnReiniciar) {
 // Botón play (avance automático)
 let playInterval = null;
 let playForce = false;
+let totalPaginas = 0; // Guardar el tamaño de la secuencia
 const btnPlay = document.getElementById('btn-play');
+
 if (btnPlay) {
     btnPlay.addEventListener('click', function() {
         if (playInterval) {
@@ -204,7 +208,16 @@ if (btnPlay) {
                     btnPlay.classList.remove('pausar');
                     return;
                 }
-                // Espera a que el avance y la visualización terminen antes de continuar
+                // Solo detener si ya se avanzó toda la secuencia según el front
+                const currentCols = document.querySelectorAll('.sim-table tr.historial-row td').length - 1;
+                if (currentCols >= totalPaginas) {
+                    clearInterval(playInterval);
+                    playInterval = null;
+                    playForce = false;
+                    btnPlay.textContent = 'Play';
+                    btnPlay.classList.remove('pausar');
+                    return;
+                }
                 await fetch('http://127.0.0.1:5000/avanzar', { method: 'POST' });
                 await mostrarEstado();
             }, 800);
