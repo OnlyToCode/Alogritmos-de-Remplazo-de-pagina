@@ -182,28 +182,31 @@ if (btnReiniciar) {
 
 // Botón play (avance automático)
 let playInterval = null;
+let playForce = false;
 const btnPlay = document.getElementById('btn-play');
 if (btnPlay) {
     btnPlay.addEventListener('click', function() {
         if (playInterval) {
             clearInterval(playInterval);
             playInterval = null;
+            playForce = false;
             btnPlay.textContent = 'Play';
             btnPlay.classList.remove('pausar');
         } else {
             btnPlay.textContent = 'Pausar';
             btnPlay.classList.add('pausar');
+            playForce = true;
             playInterval = setInterval(async () => {
-                await fetch('http://127.0.0.1:5000/avanzar', { method: 'POST' });
-                const estadoResp = await fetch('http://127.0.0.1:5000/estado');
-                const estadoData = await estadoResp.json();
-                mostrarEstado();
-                if (estadoData.estado_maquina === 'en_espera' && !estadoData.proxima_pagina) {
+                if (!playForce) {
                     clearInterval(playInterval);
                     playInterval = null;
                     btnPlay.textContent = 'Play';
                     btnPlay.classList.remove('pausar');
+                    return;
                 }
+                // Espera a que el avance y la visualización terminen antes de continuar
+                await fetch('http://127.0.0.1:5000/avanzar', { method: 'POST' });
+                await mostrarEstado();
             }, 800);
         }
     });
